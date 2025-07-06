@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>私家侦探</title>
+  <style>
+    body {
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(135deg,#23243a 0%,#1a1b2b 100%);
+      font-family: 'HarmonyOS Sans', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+      color:#f3f6fa;
+      letter-spacing:0.5px;
+    }
+    .container {
+      max-width:520px;
+      margin:0 auto;
+      padding:18px 8px 12px 8px;
+    }
+    .title {
+      font-size:26px;
+      font-weight:900;
+      margin-bottom:18px;
+      color:#fff;
+      letter-spacing:2px;
+      text-shadow:0 2px 16px #00eaff44,0 1px 0 #222;
+      text-align:center;
+      user-select:none;
+    }
+    .input-area {
+      margin-bottom:18px;
+      background:rgba(30,34,60,0.85);
+      border-radius:16px;
+      box-shadow:0 2px 16px #00eaff22;
+      padding:14px 10px 10px 10px;
+    }
+    .input-btns {
+      display:flex; gap:8px; margin-bottom:8px;
+    }
+    .parse-btn, .history-btn {
+      flex:1;
+      background:linear-gradient(90deg,#00eaff 0%,#0051ff 100%);
+      color:#fff; border:none; border-radius:8px;
+      padding:12px 0; font-size:17px; font-weight:700; cursor:pointer;
+      box-shadow:0 2px 12px #00eaff55;
+      letter-spacing:1px;
+      transition:.2s;
+    }
+    .parse-btn.active, .history-btn.active {
+      background:linear-gradient(90deg,#fff 0%,#00eaff 100%);
+      color:#0051ff;
+      border:2px solid #00eaff;
+      box-shadow:0 0 0 3px #00eaff99,0 2px 12px #00eaff77;
+    }
+    textarea {
+      width:100%; min-height:100px; border-radius:10px; border:none;
+      font-size:15px; padding:10px; resize:vertical; box-sizing:border-box;
+      background:rgba(36,38,60,0.95); color:#fff; outline:none;
+      font-family:inherit;
+      box-shadow:0 1px 6px #00eaff22 inset;
+      margin-bottom:8px;
+      transition:.2s;
+    }
+    textarea:focus { box-shadow:0 2px 12px #00eaff55 inset; }
+    .history-panel {
+      margin-bottom:10px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:10px 10px 8px 10px;
+    }
+    .history-title {
+      font-size:15px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:6px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .history-list {
+      display:flex; flex-wrap:wrap; gap:6px 10px;
+    }
+    .history-tag {
+      background:linear-gradient(90deg,#00eaff33 0%,#0051ff33 100%);
+      color:#fff; border-radius:8px; padding:2px 10px; font-size:13px; margin:2px 0;
+      box-shadow:0 1px 8px #00eaff33;
+      text-shadow:0 1px 4px #0051ff55;
+      font-weight:500;
+      letter-spacing:1px;
+      transition:.2s;
+      white-space:nowrap;
+    }
+    .quick-btns {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .quick-btn {
+      padding: 2px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(90deg,#00eaff 0%,#0051ff 100%);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .15s;
+    }
+    .quick-btn:active {
+      background: linear-gradient(90deg,#0051ff 0%,#00eaff 100%);
+      color: #fff;
+    }
+    .grid49 {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:10px;
+      margin-bottom:10px;
+    }
+    .num-block {
+      background:rgba(36,38,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff22,0 1px 2px #0004;
+      min-height:60px;
+      display:flex; flex-direction:column; align-items:center; position:relative;
+      transition:.2s;
+      padding:8px 4px 8px 4px;
+      overflow:hidden;
+    }
+    .num-btn {
+      width:38px; height:38px; border-radius:50%;
+      background:linear-gradient(135deg,#00eaff 0%,#0051ff 100%);
+      color:#fff; font-size:19px; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:4px; cursor:pointer; border:2px solid #00eaff;
+      box-shadow:0 2px 12px #00eaff55,0 1px 2px #0004;
+      user-select:none;
+      transition:.2s;
+      outline:none;
+      position:relative;
+      z-index:2;
+    }
+    .num-btn.active {
+      background:linear-gradient(135deg,#fff 0%,#00eaff 100%);
+      color:#0051ff;
+      border-color:#fff;
+      box-shadow:0 0 0 3px #00eaff99,0 2px 12px #00eaff77;
+      transform:scale(1.08);
+    }
+    .num-btn.red {
+      background:linear-gradient(135deg,#ff3b3b 0%,#ffb199 100%) !important;
+      color:#fff !important;
+      border-color:#fff !important;
+      box-shadow:0 0 0 3px #ff3b3b99,0 2px 12px #ffb19977 !important;
+    }
+    .user-list {
+      margin-top:2px; width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:flex-start;
+      gap:4px 6px;
+      animation:fadeIn .4s;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(10px);}
+      to { opacity:1; transform:translateY(0);}
+    }
+    .user-tag {
+      background:linear-gradient(90deg,#00eaff33 0%,#0051ff33 100%);
+      color:#fff; border-radius:8px; padding:2px 7px; font-size:12px; margin:1px 0;
+      box-shadow:0 1px 8px #00eaff33;
+      text-shadow:0 1px 4px #0051ff55;
+      font-weight:500;
+      letter-spacing:0.5px;
+      transition:.2s;
+      white-space:nowrap;
+    }
+    .count {
+      font-size:13px; color:#00eaff; margin-bottom:2px; font-weight:700;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .detail-panel {
+      margin-top:18px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:14px 10px 10px 10px;
+    }
+    .detail-title {
+      font-size:16px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:10px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .detail-list {
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .detail-item {
+      color:#fff;
+      font-size:13px;
+      background:linear-gradient(90deg,#00eaff22 0%,#0051ff22 100%);
+      border-radius:7px;
+      padding:5px 10px;
+      word-break:break-all;
+      box-shadow:0 1px 4px #00eaff22;
+      letter-spacing:1px;
+    }
+    .stat-panel {
+      margin-top:18px;
+      background:rgba(30,34,60,0.98);
+      border-radius:14px;
+      box-shadow:0 2px 12px #00eaff33;
+      padding:14px 10px 10px 10px;
+    }
+    .stat-title {
+      font-size:16px;
+      font-weight:700;
+      color:#00eaff;
+      margin-bottom:10px;
+      letter-spacing:1px;
+      text-shadow:0 1px 4px #00eaff55;
+    }
+    .stat-list {
+      font-size:13px;
+      color:#fff;
+      line-height:1.8;
+      word-break:break-all;
+    }
+    .detail-num.highlight-num {
+  background: #ff3b3b;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-weight: bold;
+}
+    @media (max-width: 400px) {
+      .container { padding:2px; }
+      .num-btn { width:28px; height:28px; font-size:15px;}
+      .user-tag, .history-tag { font-size:10px; padding:2px 5px;}
+      .quick-btn { font-size:11px; padding:2px 6px;}
+      .title { font-size:20px;}
+      .detail-title, .stat-title, .history-title { font-size:14px;}
+      .detail-item, .stat-list { font-size:11px; padding:3px 6px;}
+    }
+    .stat-panel table { font-family: monospace,Consolas,'SF Mono','Menlo',monospace; }
+.stat-panel th, .stat-panel td { text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">私家侦探</div>
+    <div class="input-area">
+      <div class="input-btns">
+        <button class="parse-btn active" id="btnToday" onclick="onTodayClick()">解析数据</button>
+        <button class="history-btn" id="btnHistory" onclick="onHistoryClick()">历史开奖用户</button>
+      </div>
+      <textarea id="mainInput" placeholder="请粘贴数据"></textarea>
+      <div id="historyPanel"></div>
+    </div>
+    <div class="quick-btns" id="quickBtns"></div>
+    <div class="grid49" id="grid49"></div>
+    <div id="detailPanel"></div>
+    <div id="statPanel"></div>
+    <!-- 在statPanel后面加 -->
+  </div>
+<script>
+const NUM_SHENGXIAO_MAP = {
+  "01": "蛇", "13": "蛇", "25": "蛇", "37": "蛇", "49": "蛇",
+  "07": "猪", "19": "猪", "31": "猪", "43": "猪",
+  "02": "龙", "14": "龙", "26": "龙", "38": "龙",
+  "08": "狗", "20": "狗", "32": "狗", "44": "狗",
+  "03": "兔", "15": "兔", "27": "兔", "39": "兔",
+  "09": "鸡", "21": "鸡", "33": "鸡", "45": "鸡",
+  "04": "虎", "16": "虎", "28": "虎", "40": "虎",
+  "10": "猴", "22": "猴", "34": "猴", "46": "猴",
+  "05": "牛", "17": "牛", "29": "牛", "41": "牛",
+  "11": "羊", "23": "羊", "35": "羊", "47": "羊",
+  "06": "鼠", "18": "鼠", "30": "鼠", "42": "鼠",
+  "12": "马", "24": "马", "36": "马", "48": "马"
+};
+let users = [];
+let numUserMap = {};
+let activeNums = {};
+let mode = 'today'; // 'today' or 'history'
+let todayInput = '';
+let historyInput = '';
+let todayUsers = [];
+let todayNumUserMap = {};
+
+// 监听输入框变化，分别保存内容并自动解析
+document.getElementById('mainInput').addEventListener('input', function() {
+  if (mode === 'today') {
+    todayInput = this.value;
+    parseAndRender();
+  } else if (mode === 'history') {
+    historyInput = this.value;
+    parseAndRender(); // 新增，保证 window._allTodayUsers 最新
+    parseHistoryUsersAndAutoSelect();
+  }
+});
+
+function onTodayClick() {
+  mode = 'today';
+  document.getElementById('btnToday').classList.add('active');
+  document.getElementById('btnHistory').classList.remove('active');
+  document.getElementById('historyPanel').style.display = 'none';
+  document.getElementById('mainInput').value = todayInput;
+  parseAndRender();
+}
+function onHistoryClick() {
+  mode = 'history';
+  document.getElementById('btnToday').classList.remove('active');
+  document.getElementById('btnHistory').classList.add('active');
+  document.getElementById('historyPanel').style.display = '';
+  document.getElementById('mainInput').value = historyInput;
+  parseHistoryUsersAndAutoSelect();
+}
+
+function parseUserData(raw) {
+  // 先去掉所有网址，按网址分块
+  let blocks = raw.split(/https?:\/\/t\.me\/[^\s]+/g);
+  const users = [];
+  for (let block of blocks) {
+    let lines = block.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    let i = 0;
+    while (i < lines.length) {
+      // 只认带逗号和日期的行为用户名（支持表情和特殊字符）
+      let m = lines[i].match(/^(.+?)[,，:：\s]*\[\d{4}[年\/\-\.]\d{1,2}[月\/\-\.]\d{1,2}/);
+      if (!m) { i++; continue; }
+      let name = m[1].trim();
+      let userLines = [lines[i]];
+      i++;
+      // 收集到下一个用户名或块结束
+      while (
+        i < lines.length &&
+        !lines[i].match(/^(.+?)[,，:：\s]*\[\d{4}[年\/\-\.]\d{1,2}[月\/\-\.]\d{1,2}/)
+      ) {
+        userLines.push(lines[i]);
+        i++;
+      }
+      // 合并所有相关行
+      let blockText = userLines.join('\n');
+      let nums = [];
+
+      // 1. 优先找“12码”或“新澳12码”等关键字后的数字串
+      let found = false;
+      let numMatch = blockText.match(/(?:12[\s]*码|12[\s]*碼|新澳12码|新澳12碼|新澳12码：|新澳12碼：|新澳12码:|新澳12碼:)[^\d\n]*([\d\s,，.．、;；\-—_·`'\"\/\\]*)/i);
+      if (numMatch) {
+        let numStr = numMatch[1];
+        // 拆4位数
+        numStr = numStr.replace(/(\d{4})/g, function(m) {
+          return m.slice(0,2) + ' ' + m.slice(2,4);
+        });
+        nums = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+          .split(/\s+/)
+          .map(n => n.padStart(2, '0'))
+          .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49);
+        found = true;
+      }
+      // 2. 如果没找到，再找“新澳xx期”或“新奥xx期”后紧跟的数字
+      if (!found) {
+        let numMatch2 = blockText.match(/新[澳奥门][^\d]{0,3}\d{2,4}[期：:]*([\d\s,，.．、;；\-—_·`'\"\/\\]*)/i);
+        if (numMatch2) {
+          let numStr = numMatch2[1];
+          numStr = numStr.replace(/(\d{4})/g, function(m) {
+            return m.slice(0,2) + ' ' + m.slice(2,4);
+          });
+          nums = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+            .split(/\s+/)
+            .map(n => n.padStart(2, '0'))
+            .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49);
+          found = true;
+        }
+      }
+      // 3. 如果还没找到，兜底：所有行的最长数字串
+      if (!found) {
+        let allNums = [];
+        for (let l of userLines) {
+          let numStr = l.replace(/[^\d,，.．、;；\-—_·`'\"\/\\\s]/g,'');
+          numStr = numStr.replace(/(\d{4})/g, function(m) {
+            return m.slice(0,2) + ' ' + m.slice(2,4);
+          });
+          let numsLine = numStr.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+            .split(/\s+/)
+            .map(n => n.padStart(2, '0'))
+            .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49);
+          allNums = allNums.concat(numsLine);
+        }
+        nums = allNums;
+      }
+      // 只取前12个，顺序不变
+      nums = nums.slice(0, 12);
+      if (!name || nums.length === 0) continue;
+      users.push({ name, nums });
+    }
+  }
+  // 合并__extra补充的数字
+  for (let u of users) {
+    if (u.__extra) {
+      let extraText = u.__extra.join('\n');
+      extraText = extraText.replace(/(\d{4})/g, function(m) {
+        return m.slice(0,2) + ' ' + m.slice(2,4);
+      });
+      let extraNums = extraText.replace(/[，,、.．;；\-—_·`'\"\/\\]/g, ' ')
+        .split(/\s+/)
+        .map(n => n.padStart(2, '0'))
+        .filter(n => /^\d{2}$/.test(n) && +n >= 1 && +n <= 49);
+      u.nums = u.nums.concat(extraNums).slice(0, 12);
+      delete u.__extra;
+    }
+  }
+  // 去重且保留顺序
+  const seen = new Set();
+  const result = [];
+  users.forEach(u => {
+    let key = u.name + u.nums.join(',');
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(u);
+    }
+  });
+  return result;
+}
+function buildNumUserMap(users) {
+  const map = {};
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    map[num] = [];
+  }
+  users.forEach(u => {
+    u.nums.forEach(num => {
+      if (map[num] && u.name) map[num].push(u.name);
+    });
+  });
+  for (let k in map) {
+    map[k] = Array.from(new Set(map[k]));
+  }
+  return map;
+}
+
+// 历史记录用户名提取与自动勾选，只统计历史用户
+function parseHistoryUsersAndAutoSelect() {
+  const raw = document.getElementById('mainInput').value;
+  const lines = raw.split('\n');
+  const names = [];
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+    let m = line.match(/^(.+?),\s*\[\d{4}\/\d{1,2}\/\d{1,2}\/?.*?\d{1,2}:\d{2}\]/);
+    if (m) { names.push(m[1].trim()); continue; }
+    let m2 = line.match(/^(.+?),\s*\[\d{4}\/\d{1,2}\/\d{1,2}.*?\d{1,2}:\d{2}\]/);
+    if (m2) { names.push(m2[1].trim()); continue; }
+  }
+  const uniqueNames = Array.from(new Set(names)).filter(Boolean);
+  const nameSet = new Set(uniqueNames);
+
+  // 渲染用户名
+  const panel = document.getElementById('historyPanel');
+  if (uniqueNames.length === 0) {
+    panel.innerHTML = '<div style="color:#888;font-size:13px;">未识别到用户名</div>';
+  } else {
+    let html = `<div class="history-panel">
+      <div class="history-title">历史记录用户名（共${uniqueNames.length}个）</div>
+      <div class="history-list">`;
+    uniqueNames.forEach(name => {
+      html += `<span class="history-tag">${name}</span>`;
+    });
+    html += `</div></div>`;
+    panel.innerHTML = html;
+  }
+
+  // 自动勾选这些用户在最新数据中的数字
+  activeNums = {};
+  let baseUsers = window._allTodayUsers || todayUsers;
+  users = baseUsers.filter(u => nameSet.has(u.name));
+  let numsSet = new Set();
+  users.forEach(u => {
+    u.nums.forEach(num => numsSet.add(num));
+  });
+  numsSet.forEach(num => activeNums[num] = true);
+  numUserMap = buildNumUserMap(users);
+
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+}
+
+
+function getSelectedUsersDetail() {
+  // 保证顺序和 users 一致
+  return users.filter(u =>
+    u.nums.some(num => activeNums[num])
+  );
+}
+
+function getSelectedNumsStat(selectedUsers) {
+  const stat = {};
+  for (let i = 1; i <= 49; i++) stat[i.toString().padStart(2, '0')] = 0;
+  selectedUsers.forEach(u => {
+    u.nums.forEach(num => {
+      if (stat[num] !== undefined) stat[num]++;
+    });
+  });
+  const group = {};
+  Object.entries(stat).forEach(([num, count]) => {
+    if (!group[count]) group[count] = [];
+    group[count].push(num);
+  });
+  const sorted = Object.entries(group)
+    .filter(([count, arr]) => arr.length > 0)
+    .sort((a, b) => b[0] - a[0]);
+  return sorted;
+}
+
+function renderQuickBtns() {
+  const quickBtns = document.getElementById('quickBtns');
+  let html = '';
+  if (mode === 'today') {
+    html = `
+      <button class="quick-btn" onclick="selectAllNums()">全勾选</button>
+      <button class="quick-btn" onclick="unselectAllNums()">全不选</button>
+    `;
+  } else if (mode === 'history') {
+    html = `
+      <button class="quick-btn" onclick="selectAllHistoryNums()">全勾选</button>
+      <button class="quick-btn" onclick="unselectAllHistoryNums()">全不选</button>
+    `;
+  }
+  quickBtns.innerHTML = html;
+}
+function selectAllNums() {
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    activeNums[num] = true;
+  }
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function unselectAllNums() {
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function selectAllHistoryNums() {
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    if ((numUserMap[num]||[]).length > 0) activeNums[num] = true;
+  }
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+function unselectAllHistoryNums() {
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+
+function renderGrid49() {
+  renderQuickBtns();
+  const grid = document.getElementById('grid49');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 49; i++) {
+    let num = i.toString().padStart(2, '0');
+    let block = document.createElement('div');
+    block.className = 'num-block';
+    let btnClass = 'num-btn';
+    if (activeNums[num]) {
+      btnClass += ' active';
+      if (mode === 'history') btnClass += ' red';
+    }
+    let btn = document.createElement('div');
+    btn.className = btnClass;
+    btn.innerText = num;
+    btn.onclick = function() {
+      activeNums[num] = !activeNums[num];
+      renderGrid49();
+      renderDetailPanel();
+      renderStatPanel();
+    };
+    block.appendChild(btn);
+    let userList = numUserMap[num] || [];
+    let count = document.createElement('div');
+    count.className = 'count';
+    count.innerText = userList.length + '人';
+    block.appendChild(count);
+    if (activeNums[num]) {
+      let ul = document.createElement('div');
+      ul.className = 'user-list';
+      userList.forEach(name => {
+        let tag = document.createElement('span');
+        tag.className = 'user-tag';
+        tag.innerText = name;
+        ul.appendChild(tag);
+      });
+      block.appendChild(ul);
+    }
+    grid.appendChild(block);
+  }
+}
+let highlightedNum = null;
+if (!window.streakCardUnhighlightNums) window.streakCardUnhighlightNums = [];
+if (!window.patternCardUnhighlightNums) window.patternCardUnhighlightNums = [];
+
+// 检查某数字是否在所有用户顺序中，存在一段连续区间，正好有 groupCount 组“2有1无”模式
+function isPatternNum(selectedUsers, num, groupCount = 5) {
+  let arr = selectedUsers.map(u => u.nums.slice(0, 12).includes(num) ? 1 : 0);
+  let needLen = groupCount * 3; // 5组就是15人
+  for (let i = 0; i <= arr.length - needLen; i++) {
+    let ok = true;
+    for (let g = 0; g < groupCount; g++) {
+      let base = i + g * 3;
+      if (!(arr[base] === 1 && arr[base + 1] === 1 && arr[base + 2] === 0)) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return true;
+  }
+  return false;
+}
+
+function renderDetailPanel() {
+  const detailPanel = document.getElementById('detailPanel');
+  const selectedUsers = getSelectedUsersDetail();
+  if (selectedUsers.length === 0) {
+    detailPanel.innerHTML = '';
+    return;
+  }
+
+  // 连续5人以上共现数字
+  let streakNums = [];
+  for (let n = 1; n <= 49; n++) {
+    let num = n.toString().padStart(2, '0');
+    let streak = 0;
+    for (let i = 0; i < selectedUsers.length; i++) {
+      let u = selectedUsers[i];
+      if (u.nums.slice(0, 12).includes(num)) {
+        streak++;
+      } else {
+        if (streak >= 5) streakNums.push(num);
+        streak = 0;
+      }
+    }
+    if (streak >= 5) streakNums.push(num);
+  }
+  streakNums = Array.from(new Set(streakNums));
+  let unhighlightNums = window.streakCardUnhighlightNums;
+
+  // streak 卡片
+  let cardHtml = `
+    <div id="streakCardBox" style="margin-bottom:6px;text-align:left;">
+      <span style="
+        display:inline-block;
+        background:linear-gradient(90deg,#a259ff 0%,#43e97b 100%);
+        border-radius:7px;padding:2px 10px;
+        color:#fff;font-size:12px;font-weight:600;
+        margin-bottom:2px;box-shadow:0 1px 2px #a259ff22;
+        letter-spacing:1px;line-height:1.2;
+      ">连续5人以上共现数字</span>
+      <div id="streakNums" style="margin-top:2px;display:flex;flex-wrap:wrap;gap:2px;">
+        ${
+          streakNums.length > 0
+          ? streakNums.map(num => {
+              let isUnhighlight = unhighlightNums.includes(num);
+              return `<span class="streak-num-btn" data-num="${num}" style="
+                display:inline-block;cursor:pointer;
+                background:linear-gradient(90deg,#a259ff 0%,#43e97b 100%);
+                color:#fff;border-radius:4px;padding:1px 6px;
+                font-weight:bold;font-size:11px;
+                border:${isUnhighlight ? '2px solid #888' : '2px solid #fff'};
+                opacity:${isUnhighlight ? 0.3 : 1};
+                box-shadow:${isUnhighlight ? 'none' : '0 0 4px #43e97b'};
+                margin:0;
+                transition:all .15s;">
+                ${num}
+              </span>`;
+            }).join('')
+          : ''
+        }
+      </div>
+    </div>
+  `;
+
+  // 统计有高亮数字的用户数
+  let highlightCount = 0;
+  if (highlightedNum) {
+    selectedUsers.forEach(u => {
+      if (u.nums.includes(highlightedNum)) highlightCount++;
+    });
+  }
+
+  // ----------- 动态统计无高亮用户数字 -----------
+  const highlightSet = new Set(streakNums);
+  let noHighlightUsers = selectedUsers.filter(u =>
+    u.nums.slice(0, 12).every(num => !highlightSet.has(num))
+  );
+  let numCount = {};
+  for (let n = 1; n <= 49; n++) {
+    numCount[n.toString().padStart(2, '0')] = 0;
+  }
+  noHighlightUsers.forEach(u => {
+    u.nums.slice(0, 12).forEach(num => {
+      if (numCount[num] !== undefined) numCount[num]++;
+    });
+  });
+  let countMap = {};
+  Object.entries(numCount).forEach(([num, count]) => {
+    if (!countMap[count]) countMap[count] = [];
+    countMap[count].push(num);
+  });
+  let countList = Object.keys(countMap).map(Number).sort((a, b) => b - a);
+  let statHtml = '';
+  if (noHighlightUsers.length > 0) {
+    statHtml += `<div style="margin:12px 0 0 0;padding:10px 14px;background:linear-gradient(90deg,#23272e 0%,#1a1d23 100%);border-radius:8px;color:#eaf6ff;font-size:15px;line-height:1.8;">
+      <b>没有任何高亮的用户（共${noHighlightUsers.length}人）数字统计：</b><br>`;
+    countList.forEach(cnt => {
+      // 过滤掉高亮数字
+      let nums = countMap[cnt]
+        .filter(num => !highlightSet.has(num))
+        .sort((a, b) => Number(a) - Number(b));
+      if (nums.length > 0) {
+        statHtml += `〖${cnt}次〗<span style="color:#fff;">${nums.join(' ')}</span>（共计${nums.length}个）<br>`;
+      }
+    });
+    statHtml += `</div>`;
+  }
+
+// ----------- 渲染 -----------
+let html = cardHtml + `<div class="detail-panel">
+  <div class="detail-title" style="font-size:13px;">选中数字下所有用户的原始数据`
+  + (highlightedNum ? `（高亮数字 <span style='color:#ff3b3b;font-weight:bold;'>${highlightedNum}</span>，共${highlightCount}人）` : '')
+  + `</div><div class="detail-list">`;
+let allSum = 0;
+selectedUsers.forEach((u, idx) => {
+  // 去重后的12码
+  let nums = [];
+  let seen = new Set();
+  u.nums.slice(0, 12).forEach(num => {
+    let numStr = num.toString().padStart(2, '0');
+    if (!seen.has(numStr)) {
+      seen.add(numStr);
+      nums.push(numStr);
+    }
+  });
+  let sum = nums.reduce((a, b) => a + Number(b), 0);
+  allSum += sum;
+  // 用户名
+  html += `<div class="detail-item" style="font-size:12px;padding:3px 4px;">
+    <span style="color:#00eaff;font-weight:bold;margin-right:6px;">${idx + 1}.</span>${u.name}：<br>`;
+  // 12码一行，等宽字体，宽度对齐，数字两位，中央对齐
+  html += `<div style="display:flex;gap:0;margin:2px 0 0 0;">`;
+  nums.forEach((numStr, i) => {
+    let cls = 'detail-num';
+    let style = "display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;";
+    if (streakNums.includes(numStr) && !unhighlightNums.includes(numStr)) {
+      cls += ' highlight-num';
+    }
+    if (highlightedNum === numStr) {
+      style += "color:#ff3b3b;font-weight:bold;background:#fff2;";
+    }
+    html += `<span style="${style}">
+      <span class="${cls}" data-num="${numStr}" style="font-family:monospace,Consolas,'SF Mono','Menlo',monospace;font-size:15px;text-align:center;cursor:pointer;display:block;width:100%;">${numStr}</span>
+      <span style="font-family:monospace,Consolas,'SF Mono','Menlo',monospace;font-size:11px;color:#888;text-align:center;display:block;width:100%;">位置${i+1}</span>
+    </span>`;
+  });
+  html += `</div></div>`;
+});
+html += `</div>
+  <div style="margin-top:6px;color:#00eaff;font-weight:bold;font-size:12px;">所有用户12码总和：${allSum}</div>
+  ${statHtml}
+`;
+detailPanel.innerHTML = html;
+
+  // 绑定 streak 卡片下数字点击事件
+  document.querySelectorAll('.streak-num-btn').forEach(el => {
+    el.onclick = function(e) {
+      let num = this.getAttribute('data-num');
+      let idx = window.streakCardUnhighlightNums.indexOf(num);
+      if (idx === -1) {
+        window.streakCardUnhighlightNums.push(num);
+      } else {
+        window.streakCardUnhighlightNums.splice(idx, 1);
+      }
+      renderDetailPanel();
+      e.stopPropagation();
+    };
+  });
+
+  // 绑定点击数字高亮事件
+  document.querySelectorAll('.detail-num').forEach(el => {
+    el.onclick = function() {
+      let num = this.getAttribute('data-num');
+      if (highlightedNum === num) {
+        highlightedNum = null;
+      } else {
+        highlightedNum = num;
+      }
+      renderDetailPanel();
+    };
+  });
+}
+// ...existing code...
+
+function renderStatPanel() {
+  const statPanel = document.getElementById('statPanel');
+  const selectedUsers = getSelectedUsersDetail();
+  if (selectedUsers.length === 0) {
+    statPanel.innerHTML = '';
+    return;
+  }
+  // 数字出现次数统计（原有功能）
+  const statArr = getSelectedNumsStat(selectedUsers);
+  let html = `<div class="stat-panel">
+    <div class="stat-title">数字出现次数统计</div>
+    <div class="stat-list">`;
+  statArr.forEach(([count, nums]) => {
+    if (parseInt(count) === 0) return;
+    html += `〖${count}次〗${nums.join(' ')}（共计${nums.length}个）<br>`;
+  });
+  let zeroNums = statArr.find(([count]) => parseInt(count) === 0);
+  if (zeroNums && zeroNums[1].length > 0) {
+    html += `〖0次〗${zeroNums[1].join(' ')}（共计${zeroNums[1].length}个）<br>`;
+  }
+  html += `</div></div>`;
+  statPanel.innerHTML = html;
+}
+
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+}
+
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+};
+let statOrderHighlightNum = null; // 高亮的数字
+
+// ...existing code...
+
+
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  renderStatOrderPanel();
+}
+function onTodayClick() {
+  mode = 'today';
+  document.getElementById('btnToday').classList.add('active');
+  document.getElementById('btnHistory').classList.remove('active');
+  document.getElementById('historyPanel').style.display = 'none';
+  document.getElementById('mainInput').value = todayInput;
+  parseAndRender();
+  renderStatOrderPanel();
+}
+function onHistoryClick() {
+  mode = 'history';
+  document.getElementById('btnToday').classList.remove('active');
+  document.getElementById('btnHistory').classList.add('active');
+  document.getElementById('historyPanel').style.display = '';
+  document.getElementById('mainInput').value = historyInput;
+  parseHistoryUsersAndAutoSelect();
+  renderStatOrderPanel();
+}
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  renderStatOrderPanel();
+};
+// 固定组合组定义
+const GROUPS = [
+  ["01","13","25","37","49"],
+  ["07","19","31","43"],
+  ["02","14","26","38"],
+  ["08","20","32","44"],
+  ["03","15","27","39"],
+  ["09","21","33","45"],
+  ["04","16","28","40"],
+  ["10","22","34","46"],
+  ["05","17","29","41"],
+  ["11","23","35","47"],
+  ["06","18","30","42"],
+  ["12","24","36","48"]
+];
+
+// 只找2个连续相邻且顺序一致的组合
+function findAdjacentGroup(nums, group) {
+  let res = [];
+  for (let i = 0; i < nums.length - 1; i++) {
+    for (let j = 0; j < group.length - 1; j++) {
+      if (nums[i] === group[j] && nums[i + 1] === group[j + 1]) {
+        res.push(nums[i] + ' ' + nums[i + 1]);
+      }
+    }
+  }
+  // 去重
+  return Array.from(new Set(res));
+}
+
+// 只找2个连续相邻且顺序一致的组合
+function findAdjacentGroup(nums, group) {
+  let res = [];
+  for (let i = 0; i < nums.length - 1; i++) {
+    for (let j = 0; j < group.length - 1; j++) {
+      if (nums[i] === group[j] && nums[i + 1] === group[j + 1]) {
+        res.push([nums[i], nums[i + 1]]);
+      }
+    }
+  }
+  // 去重
+  let strSet = new Set(res.map(arr => arr.join(' ')));
+  return Array.from(strSet).map(s => s.split(' '));
+}
+
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+  window._allTodayUsers = users.slice(); // ← 只加这一行
+}
+function onTodayClick() {
+  mode = 'today';
+  document.getElementById('btnToday').classList.add('active');
+  document.getElementById('btnHistory').classList.remove('active');
+  document.getElementById('historyPanel').style.display = 'none';
+  document.getElementById('mainInput').value = todayInput;
+  parseAndRender();
+  renderStatOrderPanel();
+  renderGroupPanel(); // 新增
+}
+function onHistoryClick() {
+  mode = 'history';
+  document.getElementById('btnToday').classList.remove('active');
+  document.getElementById('btnHistory').classList.add('active');
+  document.getElementById('historyPanel').style.display = '';
+  document.getElementById('mainInput').value = historyInput;
+  parseHistoryUsersAndAutoSelect();
+  renderStatOrderPanel();
+  renderGroupPanel(); // 新增
+}
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  renderStatOrderPanel();
+  renderGroupPanel(); // 新增
+};
+function renderPositionIntersectionPanel() {
+  const panelId = 'positionIntersectionPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    panel.className = 'stat-panel';
+    const ref = document.getElementById('adjacentPositionStatPanel') || document.getElementById('groupPanelStat');
+    if (ref && ref.parentNode) {
+      ref.parentNode.insertBefore(panel, ref.nextSibling);
+    } else {
+      document.querySelector('.container').appendChild(panel);
+    }
+  }
+  if (!todayUsers || todayUsers.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  let html = `<div class="stat-title">每对相邻位置共同出现的数字（所有用户该位置的交集）</div>
+    <div class="stat-list" style="font-size:13px;">`;
+  let totalHeadCount = [0, 0, 0, 0, 0];
+  let numAppearCount = {};
+  // 所有生肖集合
+  const allShengxiao = Array.from(new Set(Object.values(NUM_SHENGXIAO_MAP)));
+  for (let i = 0; i < 11; i++) {
+    let posA = [], posB = [];
+    todayUsers.forEach(u => {
+      if (u.nums[i]) posA.push(u.nums[i]);
+      if (u.nums[i+1]) posB.push(u.nums[i+1]);
+    });
+    let setA = new Set(posA);
+    let setB = new Set(posB);
+    let intersection = Array.from(setA).filter(x => setB.has(x));
+    intersection.sort((a, b) => Number(a) - Number(b));
+    let headCount = [0, 0, 0, 0, 0];
+    // 统计本组已出现生肖
+    let shengxiaoSet = new Set();
+    intersection.forEach(num => {
+      let head = String(num).padStart(2, '0').slice(0, 1);
+      if (head >= '0' && head <= '4') {
+        headCount[Number(head)]++;
+        totalHeadCount[Number(head)]++;
+      }
+      numAppearCount[num] = (numAppearCount[num] || 0) + 1;
+      let sx = NUM_SHENGXIAO_MAP[num];
+      if (sx) shengxiaoSet.add(sx);
+    });
+    // 计算未出现生肖
+    let missingShengxiao = allShengxiao.filter(sx => !shengxiaoSet.has(sx));
+    let headText = '';
+    for (let h = 0; h <= 4; h++) {
+      headText += `<span style="font-size:11px;color:#ff3b3b;margin-left:12px;">${h}头${headCount[h]}</span>`;
+    }
+
+    html += `第${i+1}位-第${i+2}位：`;
+    if (intersection.length) {
+      // 每行最多12个，适合手机一排半
+      let groupSize = 12;
+      for (let start = 0; start < intersection.length; start += groupSize) {
+        let numsGroup = intersection.slice(start, start + groupSize);
+        html += `
+          <div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:2px;">
+            <div style="display:flex;gap:0;">
+              ${numsGroup.map(num => `<span style="display:inline-block;width:22px;text-align:center;color:#fff;">${num}</span>`).join('')}
+            </div>
+            <div style="display:flex;gap:0;margin-top:2px;">
+              ${numsGroup.map(num => {
+                let sx = NUM_SHENGXIAO_MAP[num] || '';
+                return `<span style="display:inline-block;width:22px;text-align:center;font-size:10px;color:#19e06e;">${sx}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+      // 红色标记未出现生肖
+      if (missingShengxiao.length > 0) {
+        html += `<div style="margin:2px 0 6px 0;font-size:13px;color:#ff3b3b;font-weight:bold;">
+          未出现生肖：${missingShengxiao.join(' ')}
+        </div>`;
+        // 统计未出现生肖在所有用户12码中出现的次数
+        let sxCount = {};
+        missingShengxiao.forEach(sx => sxCount[sx] = 0);
+        todayUsers.forEach(u => {
+          u.nums.slice(0,12).forEach(num => {
+            let sx = NUM_SHENGXIAO_MAP[num];
+            if (sx && sxCount[sx] !== undefined) sxCount[sx]++;
+          });
+        });
+        // 分组
+        let group = {};
+        Object.entries(sxCount).forEach(([sx, cnt]) => {
+          if (!group[cnt]) group[cnt] = [];
+          group[cnt].push(sx);
+        });
+        let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+        html += `<div style="margin:2px 0 8px 0;font-size:13px;">`;
+        sorted.forEach(([cnt, arr]) => {
+          html += `<span style="color:#ff3b3b;">〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）</span><br>`;
+        });
+        html += `</div>`;
+      }
+    } else {
+      html += `<span style="color:#fff">无</span><br>`;
+      html += `<div style="margin:2px 0 6px 0;font-size:13px;color:#ff3b3b;font-weight:bold;">
+        未出现生肖：${allShengxiao.join(' ')}
+      </div>`;
+      // 全部未出现，统计所有生肖出现次数
+      let sxCount = {};
+      allShengxiao.forEach(sx => sxCount[sx] = 0);
+      todayUsers.forEach(u => {
+        u.nums.slice(0,12).forEach(num => {
+          let sx = NUM_SHENGXIAO_MAP[num];
+          if (sx && sxCount[sx] !== undefined) sxCount[sx]++;
+        });
+      });
+      // 分组
+      let group = {};
+      Object.entries(sxCount).forEach(([sx, cnt]) => {
+        if (!group[cnt]) group[cnt] = [];
+        group[cnt].push(sx);
+      });
+      let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+      html += `<div style="margin:2px 0 8px 0;font-size:13px;">`;
+      sorted.forEach(([cnt, arr]) => {
+        html += `<span style="color:#ff3b3b;">〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）</span><br>`;
+      });
+      html += `</div>`;
+    }
+    html += `${headText}<br>`;
+  }
+  // 总计
+  let totalText = '';
+  for (let h = 0; h <= 4; h++) {
+    totalText += `<span style="font-size:12px;color:#fff;margin-left:12px;">${h}头总计${totalHeadCount[h]}</span>`;
+  }
+  html += `<div style="margin-top:8px;">${totalText}</div>`;
+
+  // 数字出现次数分组
+  let countMap = {};
+  Object.keys(numAppearCount).forEach(num => {
+    let cnt = numAppearCount[num];
+    if (!countMap[cnt]) countMap[cnt] = [];
+    countMap[cnt].push(num);
+  });
+  let countList = Object.keys(countMap).map(x => Number(x)).sort((a, b) => b - a);
+  html += `<div style="margin-top:12px;font-size:13px;color:#fff;">`;
+  countList.forEach(cnt => {
+    let nums = countMap[cnt].sort((a, b) => Number(a) - Number(b));
+    html += `〖${cnt}次〗<span style="color:#fff">${nums.join(' ')}</span>（共计${nums.length}个）<br>`;
+  });
+  html += `</div>`;
+
+  // 新增：统计所有11组交集数字的所有生肖出现次数，并分组去重输出
+  let allNums = [];
+  for (let i = 0; i < 11; i++) {
+    let posA = [], posB = [];
+    todayUsers.forEach(u => {
+      if (u.nums[i]) posA.push(u.nums[i]);
+      if (u.nums[i+1]) posB.push(u.nums[i+1]);
+    });
+    let setA = new Set(posA);
+    let setB = new Set(posB);
+    let intersection = Array.from(setA).filter(x => setB.has(x));
+    allNums = allNums.concat(intersection);
+  }
+  // 统计生肖出现次数
+  let shengxiaoCount = {};
+  allNums.forEach(num => {
+    let sx = NUM_SHENGXIAO_MAP[num] || '';
+    if (sx) shengxiaoCount[sx] = (shengxiaoCount[sx] || 0) + 1;
+  });
+  // 按次数分组
+  let sxGroup = {};
+  Object.entries(shengxiaoCount).forEach(([sx, cnt]) => {
+    if (!sxGroup[cnt]) sxGroup[cnt] = [];
+    sxGroup[cnt].push(sx);
+  });
+  let sxCountList = Object.keys(sxGroup).map(x => Number(x)).sort((a, b) => b - a);
+  html += `<div style="margin-top:16px;font-size:15px;color:#19e06e;">`;
+  sxCountList.forEach(cnt => {
+    let arr = sxGroup[cnt];
+    html += `〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）<br>`;
+  });
+  html += `</div>`;
+
+  panel.innerHTML = html;
+}
+// 新增：渲染每对相邻位置“尾数交集”统计面板
+function renderTailIntersectionPanel() {
+  const panelId = 'tailIntersectionPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    panel.className = 'stat-panel';
+    // 推荐加在 sameTailPairPanel 后面
+    const ref = document.getElementById('sameTailPairPanel');
+    if (ref && ref.parentNode) {
+      ref.parentNode.insertBefore(panel, ref.nextSibling);
+    } else {
+      document.querySelector('.container').appendChild(panel);
+    }
+  }
+  if (!todayUsers || todayUsers.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  let html = `<div class="stat-title" style="color:#ff3b3b;">每对相邻位置“尾数交集”统计</div><div class="stat-list">`;
+  for (let pos = 0; pos < 11; pos++) {
+    // 收集所有用户该两位的号码
+    let posA = [], posB = [];
+    todayUsers.forEach(u => {
+      if (u.nums[pos]) posA.push(u.nums[pos]);
+      if (u.nums[pos+1]) posB.push(u.nums[pos+1]);
+    });
+    // 取尾数集合
+    let tailsA = new Set(posA.map(num => num[1]));
+    let tailsB = new Set(posB.map(num => num[1]));
+    // 交集
+    let intersection = Array.from(tailsA).filter(tail => tailsB.has(tail)).sort();
+    html += `<div style="margin-bottom:8px;"><b style="color:#00eaff;">第${pos+1}位-第${pos+2}位：</b>`;
+    if (intersection.length === 0) {
+      html += `<span style="color:#888;">无交集</span></div>`;
+      continue;
+    }
+    // 展示交集尾数、涉及号码、生肖
+    html += `<div style="display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:2px;">`;
+    intersection.forEach(tail => {
+      // 该尾数在A、B各有哪些号码
+      let numsA = posA.filter(num => num[1] === tail);
+      let numsB = posB.filter(num => num[1] === tail);
+      let allNums = Array.from(new Set(numsA.concat(numsB))).sort();
+      let shengxiao = allNums.map(num => NUM_SHENGXIAO_MAP[num] || '').filter(Boolean);
+      html += `<span style="display:inline-block;padding:2px 6px;border-radius:6px;background:#2a2233;color:#fff;">
+        <b style="color:#ffb300;">尾${tail}</b>：
+        <span style="color:#fff;">${allNums.join(' ')}</span>
+        <span style="color:#19e06e;font-size:11px;">（${shengxiao.join(' ')}）</span>
+      </span>`;
+    });
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+// 集成到所有数据刷新和页面加载流程
+function parseAndRender() {
+  users = parseUserData(todayInput);
+  todayUsers = users;
+  numUserMap = buildNumUserMap(users);
+  todayNumUserMap = numUserMap;
+  activeNums = {};
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+}
+function onTodayClick() {
+  mode = 'today';
+  document.getElementById('btnToday').classList.add('active');
+  document.getElementById('btnHistory').classList.remove('active');
+  document.getElementById('historyPanel').style.display = 'none';
+  document.getElementById('mainInput').value = todayInput;
+  parseAndRender();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+}
+function onHistoryClick() {
+  mode = 'history';
+  document.getElementById('btnToday').classList.remove('active');
+  document.getElementById('btnHistory').classList.add('active');
+  document.getElementById('historyPanel').style.display = '';
+  document.getElementById('mainInput').value = historyInput;
+  parseHistoryUsersAndAutoSelect();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+}
+window.onload = function() {
+  document.getElementById('historyPanel').style.display = 'none';
+  renderGrid49();
+  renderDetailPanel();
+  renderStatPanel();
+  if (typeof renderStatOrderPanel === 'function') renderStatOrderPanel();
+  if (typeof renderGroupPanel === 'function') renderGroupPanel();
+  renderPositionIntersectionPanel();
+};
+// 1. 新增：根据勾选数字筛选用户
+function getCheckedUsers() {
+  const checkedNums = Object.keys(activeNums).filter(num => activeNums[num]);
+  if (checkedNums.length === 0) return users;
+  return users.filter(u => u.nums.some(num => activeNums[num]));
+}
+
+// 2. 修改 renderGrid49，末尾加这两行（如果已加可忽略）
+const oldRenderGrid49 = renderGrid49;
+renderGrid49 = function() {
+  oldRenderGrid49();
+  todayUsers = getCheckedUsers();
+  renderPositionIntersectionPanel();
+};
+
+// 3. 在 parseAndRender、onTodayClick、onHistoryClick、window.onload 末尾都加这两行（如果已加可忽略）
+const oldParseAndRender = parseAndRender;
+parseAndRender = function() {
+  oldParseAndRender();
+  todayUsers = getCheckedUsers();
+  renderPositionIntersectionPanel();
+};
+const oldOnTodayClick = onTodayClick;
+onTodayClick = function() {
+  oldOnTodayClick();
+  todayUsers = getCheckedUsers();
+  renderPositionIntersectionPanel();
+};
+const oldOnHistoryClick = onHistoryClick;
+onHistoryClick = function() {
+  oldOnHistoryClick();
+  todayUsers = getCheckedUsers();
+  renderPositionIntersectionPanel();
+};
+const oldWindowOnload = window.onload;
+window.onload = function() {
+  if (typeof oldWindowOnload === 'function') oldWindowOnload();
+  todayUsers = getCheckedUsers();
+  renderPositionIntersectionPanel();
+};
+// 新增：统计所有组未出现的生肖出现次数，并分组展示
+function renderMissingShengxiaoStatPanel() {
+  const panelId = 'missingShengxiaoStatPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    panel.className = 'stat-panel';
+    // 放在 positionIntersectionPanel 后面
+    const ref = document.getElementById('positionIntersectionPanel');
+    if (ref && ref.parentNode) {
+      ref.parentNode.insertBefore(panel, ref.nextSibling);
+    } else {
+      document.querySelector('.container').appendChild(panel);
+    }
+  }
+  if (!todayUsers || todayUsers.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  // 所有生肖集合
+  const allShengxiao = Array.from(new Set(Object.values(NUM_SHENGXIAO_MAP)));
+  // 统计每组未出现的生肖
+  let missingCount = {};
+  allShengxiao.forEach(sx => missingCount[sx] = 0);
+  for (let i = 0; i < 11; i++) {
+    let posA = [], posB = [];
+    todayUsers.forEach(u => {
+      if (u.nums[i]) posA.push(u.nums[i]);
+      if (u.nums[i+1]) posB.push(u.nums[i+1]);
+    });
+    let setA = new Set(posA);
+    let setB = new Set(posB);
+    let intersection = Array.from(setA).filter(x => setB.has(x));
+    // 本组已出现生肖
+    let shengxiaoSet = new Set();
+    intersection.forEach(num => {
+      let sx = NUM_SHENGXIAO_MAP[num];
+      if (sx) shengxiaoSet.add(sx);
+    });
+    // 本组未出现生肖
+    let missingShengxiao = allShengxiao.filter(sx => !shengxiaoSet.has(sx));
+    missingShengxiao.forEach(sx => missingCount[sx]++);
+  }
+  // 分组统计
+  let group = {};
+  Object.entries(missingCount).forEach(([sx, cnt]) => {
+    if (cnt > 0) {
+      if (!group[cnt]) group[cnt] = [];
+      group[cnt].push(sx);
+    }
+  });
+  let sorted = Object.entries(group).sort((a, b) => b[0] - a[0]);
+  // 渲染
+  let html = `<div class="stat-title" style="color:#ff3b3b;">所有组未出现生肖出现次数统计</div><div class="stat-list">`;
+  sorted.forEach(([cnt, arr]) => {
+    html += `〖${cnt}次〗${arr.join(' ')}（共计${arr.length}个）<br>`;
+  });
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+
+// 在每次数据刷新后调用
+const oldRenderPositionIntersectionPanel = renderPositionIntersectionPanel;
+renderPositionIntersectionPanel = function() {
+  oldRenderPositionIntersectionPanel();
+  renderMissingShengxiaoStatPanel();
+};
+  // 新增：渲染每对相邻位置“尾数相同的号码交集”面板
+function renderSameTailPairPanel() {
+  const panelId = 'sameTailPairPanel';
+  let panel = document.getElementById(panelId);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = panelId;
+    panel.className = 'stat-panel';
+    // 推荐加在 groupPanelStat 后面
+    const ref = document.getElementById('groupPanelStat');
+    if (ref && ref.parentNode) {
+      ref.parentNode.insertBefore(panel, ref.nextSibling);
+    } else {
+      document.querySelector('.container').appendChild(panel);
+    }
+  }
+  if (!todayUsers || todayUsers.length === 0) {
+    panel.innerHTML = '';
+    return;
+  }
+  // 1. 统计所有组“尾数相同的号码”出现次数
+  let tailNumCount = {}; // { num: count }
+  for (let pos = 0; pos < 11; pos++) {
+    let posA = [], posB = [];
+    todayUsers.forEach(u => {
+      if (u.nums[pos]) posA.push(u.nums[pos]);
+      if (u.nums[pos+1]) posB.push(u.nums[pos+1]);
+    });
+    // 取尾数交集
+    let tailsA = {};
+    let tailsB = {};
+    posA.forEach(num => {
+      let tail = num[1];
+      if (!tailsA[tail]) tailsA[tail] = [];
+      tailsA[tail].push(num);
+    });
+    posB.forEach(num => {
+      let tail = num[1];
+      if (!tailsB[tail]) tailsB[tail] = [];
+      tailsB[tail].push(num);
+    });
+    let intersectionTails = Object.keys(tailsA).filter(tail => tailsB[tail]);
+    intersectionTails.forEach(tail => {
+      // 该组该尾数下的号码（两位都出现的号码）
+      let numsA = new Set(tailsA[tail]);
+      let numsB = new Set(tailsB[tail]);
+      let nums = Array.from(new Set([...numsA, ...numsB]));
+      nums.forEach(num => {
+        tailNumCount[num] = (tailNumCount[num] || 0) + 1;
+      });
+    });
+  }
+  // 2. 按尾数分组，并统计每个尾数的总次数
+  let tailGroup = {}; // { tail: { nums: [num...], total: n } }
+  Object.entries(tailNumCount).forEach(([num, cnt]) => {
+    let tail = num[1];
+    if (!tailGroup[tail]) tailGroup[tail] = { nums: [], total: 0 };
+    tailGroup[tail].nums.push(num);
+    tailGroup[tail].total += cnt;
+  });
+  // 3. 按总次数分组
+  let totalMap = {}; // { total: [tail, ...] }
+  Object.entries(tailGroup).forEach(([tail, obj]) => {
+    if (!totalMap[obj.total]) totalMap[obj.total] = [];
+    totalMap[obj.total].push({ tail, nums: obj.nums });
+  });
+  let totalList = Object.keys(totalMap).map(Number).sort((a, b) => b - a);
+
+  // 4. 渲染
+  let html = `<div class="stat-title" style="color:#ffb300;">所有组“尾数分组总次数”统计</div><div class="stat-list">`;
+  totalList.forEach(total => {
+    let arr = totalMap[total];
+    arr.forEach(item => {
+      let numsSorted = item.nums.sort((a, b) => Number(a) - Number(b));
+      html += `〖${total}次〗尾${item.tail}：${numsSorted.join(' ')}（共计${numsSorted.length}个）<br>`;
+    });
+  });
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+
+// 集成到所有数据刷新和页面加载流程
+const oldParseAndRender2 = parseAndRender;
+parseAndRender = function() {
+  oldParseAndRender2();
+  renderSameTailPairPanel();
+};
+const oldOnTodayClick2 = onTodayClick;
+onTodayClick = function() {
+  oldOnTodayClick2();
+  renderSameTailPairPanel();
+};
+const oldOnHistoryClick2 = onHistoryClick;
+onHistoryClick = function() {
+  oldOnHistoryClick2();
+  renderSameTailPairPanel();
+};
+const oldWindowOnload2 = window.onload;
+window.onload = function() {
+  if (typeof oldWindowOnload2 === 'function') oldWindowOnload2();
+  renderSameTailPairPanel();
+};
+</script>
+</body>
+</html>
